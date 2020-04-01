@@ -1,0 +1,5 @@
+- name: "Copy {{ item }} script"
+  template:
+    src: "{{ item }}.sh"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: u+x

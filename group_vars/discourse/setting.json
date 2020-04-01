@@ -1,0 +1,38 @@
+{
+  "postgresql": {
+    "datebase": "discourse",
+    "user": "discourse",
+    "password": "discourse"
+  },
+  "discourse": {
+    "hostname": "forums.example.com",
+    "email": "admin@example.com",
+    "_mirror": "https://gems.ruby-china.com/",
+    "_backup_hostname": ""
+  },
+  "_smtp": {
+    "address": "",
+    "port": "25",
+    "domain": "",
+    "username": "",
+    "password": "",
+    "auth": "plain",
+    "starttls": "true",
+    "verify": ""
+  },
+  "_cdn": {
+    "url": ""
+  },
+  "_s3": {
+    "bucket": "",
+    "region": "",
+    "accesskey_id": "",
+    "accesskey_secret": "",
+    "use_iam_profile": "",
+    "endpoint": ""
+  },
+  "maxmind": {
+    "_license_key": "",
+    "_db_path": ""
+  }
+}

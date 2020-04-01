@@ -1,0 +1,11 @@
+---
+- name: Copy discourse-sidekiq service
+  template:
+    src: discourse-sidekiq.service
+    dest: /etc/systemd/system/discourse-sidekiq.service
+
+- name: Start discourse-sidekiq
+  service:
+    name: discourse-sidekiq
+    state: restarted
+    enabled: yes

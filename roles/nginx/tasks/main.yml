@@ -1,0 +1,22 @@
+---
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Copy nginx configuration
+  template:
+    src: default.conf
+    dest: /etc/nginx/sites-available/default
+
+- name: Creates directory
+  file:
+    path: /var/nginx/cache/
+    state: directory
+    owner: www-data
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+    enabled: yes

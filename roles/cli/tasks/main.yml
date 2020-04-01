@@ -1,0 +1,9 @@
+---
+- name: Copy discourse scripts
+  include_tasks: copy.yml
+  with_items:
+    - discourse
+    - rails
+    - rake
+    - rbtrace
+    - stackprof

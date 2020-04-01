@@ -1,0 +1,16 @@
+[Unit]
+Description=Discourse sidekiq background processing service
+After=multi-user.target
+
+[Service]
+Type=simple
+User=discourse
+PIDFile=/var/www/discourse/tmp/pids/sidekiq.pid
+WorkingDirectory=/var/www/discourse
+Environment=RAILS_ENV=production
+ExecStart=bundle exec sidekiq -C config/sidekiq.yml
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+---
+- name: Install Discourse
+  hosts: discourse
+  remote_user: root
+  roles:
+    - lib
+    - node
+    - redis
+    - postgresql
+    - ruby
+    - discourse
+    - sidekiq
+    - nginx
+    - certbot
+    - cli

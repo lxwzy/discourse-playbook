@@ -1,0 +1,16 @@
+---
+- name: Install certbot
+  apt:
+    update_cache: yes
+    pkg:
+    - certbot
+    - python-certbot-nginx
+
+- name: Enable HTTPS
+  shell: |
+    certbot --nginx -m {{ discourse.email }} -d {{ discourse.hostname }} --agree-tos --redirect --uir --staple-ocsp -n
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted

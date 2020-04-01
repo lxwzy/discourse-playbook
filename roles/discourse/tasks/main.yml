@@ -1,0 +1,113 @@
+---
+- name: Clone discourse
+  git:
+    repo: https://github.com/discourse/discourse.git
+    version: 'v{{ version.discourse }}'
+    dest: /var/www/discourse
+    depth: 1
+    force: yes
+  register: discourse_clone
+
+- name: Add group
+  group:
+    name: www-data
+
+- name: Add user
+  user:
+    name: discourse
+    group: www-data
+
+- name: Chown for discourse
+  file:
+    path: /var/www/discourse
+    owner: discourse
+    group: www-data
+    recurse: yes
+
+- name: Copy config
+  template:
+    src: discourse.conf
+    dest: /var/www/discourse/config/discourse.conf
+    owner: discourse
+  register: discourse_config
+
+- name: Create directory
+  become: true
+  become_user: discourse
+  file:
+    path: /var/www/discourse/tmp/{{ item }}
+    state: directory
+  with_items:
+    - sockets
+    - pids
+
+- name: Init discourse
+  block:
+    - name: Set Bundler mirror
+      shell: |
+          bundle config mirror.https://rubygems.org {{ ruby.mirror }}
+      args:  
+        chdir: /var/www/discourse
+      when: ruby.mirror is defined 
+    - name: Install discourse
+      shell: |
+          bundle config set deployment 'true'
+          bundle install --retry 3 --jobs 4 --without test development
+      args:  
+        chdir: /var/www/discourse
+      environment:
+        RAILS_ENV: production
+    - name: Prepare discourse
+      shell: |
+          bundle exec rake db:migrate
+          bundle exec rake assets:precompile
+      args:  
+        chdir: /var/www/discourse
+      environment:
+        RAILS_ENV: production
+    - name: Install maxminddb
+      shell: |
+          bundle exec rake maxminddb:get
+      args:  
+        chdir: /var/www/discourse
+      environment:
+        RAILS_ENV: production
+      when: maxmind.license_key is defined
+    - set_fact:
+        admin_rake: "{{ lookup('template', 'templates/admin.rake') }}"
+    - name: Copy discourse admin:init script
+      blockinfile:
+        dest: /var/www/discourse/lib/tasks/admin.rake
+        content: '{{ admin_rake }}'
+    - name: Run discourse admin:init script
+      shell: |
+          bundle exec bin/rake admin:init >> .discourse_password
+      args:  
+        chdir: /var/www/discourse
+      environment:
+        RAILS_ENV: production
+    - name: Remove discourse admin:init script
+      blockinfile:
+        dest: /var/www/discourse/lib/tasks/admin.rake
+        content: '{{ admin_rake }}'
+        state: absent
+  become: true
+  become_user: discourse
+  when: discourse_clone.changed or discourse_config.changed
+
+- name: Record discourse admin password
+  fetch:
+    src: /var/www/discourse/.discourse_password
+    dest: .discourse_password
+    flat: yes
+
+- name: Copy discourse service
+  template:
+    src: discourse.service
+    dest: /etc/systemd/system/discourse.service
+
+- name: Start discourse
+  service:
+    name: discourse
+    state: restarted
+    enabled: yes

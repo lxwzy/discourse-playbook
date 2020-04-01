@@ -1,0 +1,14 @@
+---
+- name: Install node.js
+  apt:
+    pkg:
+    - nodejs
+    - npm
+
+- name: Install node.js packages
+  npm:
+    name: "{{ item }}"
+    global: yes
+  with_items:
+    - uglify-js
+    - svgo

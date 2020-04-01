@@ -1,0 +1,21 @@
+- name: Install Libs
+  apt:
+    update_cache: yes
+    pkg:
+    - sudo
+    - git
+    - build-essential
+    - libssl-dev
+    - libreadline-dev
+    - zlib1g-dev
+    - advancecomp
+    - jhead
+    - jpegoptim
+    - libjpeg-turbo-progs
+    - optipng
+    - gifsicle
+    - pngcrush
+    - pngquant
+    - imagemagick
+    - brotli
+    - libbrotli-dev

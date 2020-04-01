@@ -1,0 +1,15 @@
+[Unit]
+Description=Discourse service
+
+[Service]
+Type=simple
+User=discourse
+PIDFile=/var/www/discourse/tmp/pids/puma.pid
+WorkingDirectory=/var/www/discourse
+Environment=RAILS_ENV=production
+ExecStart=bundle exec config/unicorn_launcher -E production -c config/unicorn.conf.rb
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

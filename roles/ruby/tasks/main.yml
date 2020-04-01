@@ -1,0 +1,42 @@
+---
+- name: Get ruby status
+  shell: |
+      ruby -v
+  register: ruby_version
+  ignore_errors: True
+
+- name: Install Ruby
+  block:
+    - name: Clone ruby-build
+      git:
+        repo: https://github.com/sstephenson/ruby-build.git
+        dest: /tmp/ruby-build
+        depth: 1
+    - name: Install ruby-build
+      shell: |
+          ./install.sh
+      args:  
+        chdir: /tmp/ruby-build
+    - name: Install ruby
+      shell: |
+          ruby-build {{ version.ruby }} /usr/local
+    - name: Clean files
+      file:
+        path: "/tmp/ruby-build"
+        state: absent
+  when: ((ruby_version is failed) or (ruby_version.stdout.find(version.ruby)==-1))
+
+- name: Add gemrc
+  copy:
+    dest: ~/.gemrc
+    content: |
+        gem: --no-document
+
+- name: Set gem mirror
+  shell: |
+      gem sources --add {{ ruby.mirror }} --remove https://rubygems.org/
+  when: ruby.mirror is defined 
+
+- name: Install Bundler
+  shell: |
+      gem update --system && gem install bundler

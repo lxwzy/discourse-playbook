@@ -1,0 +1,48 @@
+---
+- name: Install PostgreSQL
+  apt:
+    pkg:
+    - postgresql
+    - libpq-dev
+    - python-pip
+    - python-psycopg2
+
+- name: Start PostgreSQL
+  service:
+    name: postgresql
+    state: restarted
+    enabled: yes
+
+- name: Create Database
+  become: true
+  become_user: postgres
+  postgresql_db: 
+    name: "{{ postgresql.datebase }}"
+
+- name: Add user
+  become: true
+  become_user: postgres
+  postgresql_user:
+    db: "{{ postgresql.datebase }}"
+    name: "{{ postgresql.user }}"
+    password: "{{ postgresql.password }}"
+  no_log: True
+
+- name: Change datebase's owner
+  become: true
+  become_user: postgres
+  postgresql_owner:
+    db: "{{ postgresql.datebase }}"
+    new_owner: "{{ postgresql.user }}"
+    obj_name: "{{ postgresql.user }}"
+    obj_type: database
+
+- name: Add extension
+  become: true
+  become_user: postgres
+  postgresql_ext:
+    name: "{{ item }}"
+    db: "{{ postgresql.datebase }}"
+  with_items:
+      - hstore
+      - pg_trgm
